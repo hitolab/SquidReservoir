@@ -2,6 +2,7 @@ import numpy as np
 from input_generator import InputGenerator
 from reservoir_network import ReservoirNetWork
 import matplotlib.pyplot as plt
+import csv
 
 T = 121
 dt = 1
@@ -17,6 +18,14 @@ def ReLU(x):
     return np.maximum(0, x)
 
 def main():
+
+    with open('Try2_bgr.csv','r') as f:
+    reader = csv.reader(f)
+    input_array = np.array([0])
+    for line in reader:
+        input_array = np.append(input_array, line)
+        input_array = np.delete(input_array, 0)
+
 
     model = ReservoirNetWork(inputs=train_data, #ReservoirNetwork.pyを参照
         outputs_target = target_data,
