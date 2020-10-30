@@ -1,6 +1,6 @@
 import numpy as np
-from input_generator import InputGenerator
 from reservoir_network import ReservoirNetWork
+from generate_bgr import ImageProcessing
 import matplotlib.pyplot as plt
 import csv
 
@@ -15,39 +15,33 @@ NUM_TIME_STEPS = int(T/dt)
 
 # example of activator
 def ReLU(x):
-    return np.maximum(0, x)
+	return np.maximum(0, x)
 
 def main():
 
-    with open('Try2_bgr.csv','r') as f:
-    reader = csv.reader(f)
-    input_array = np.array([0])
-    for line in reader:
-        input_array = np.append(input_array, line)
-        input_array = np.delete(input_array, 0)
+	input_data = ImageProcessing.generate_bgr(4, 3)##画像を何個に分割するか(横、縦)
 
+	model = ReservoirNetWork(inputs=input_data, #ReservoirNetwork.pyを参照
+		outputs_target = target_data,
+		num_input_nodes=NUM_INPUT_NODES, 
+		num_reservoir_nodes=NUM_RESERVOIR_NODES, 
+		num_output_nodes=NUM_OUTPUT_NODES, 
+		leak_rate=LEAK_RATE)
 
-    model = ReservoirNetWork(inputs=train_data, #ReservoirNetwork.pyを参照
-        outputs_target = target_data,
-        num_input_nodes=NUM_INPUT_NODES, 
-        num_reservoir_nodes=NUM_RESERVOIR_NODES, 
-        num_output_nodes=NUM_OUTPUT_NODES, 
-        leak_rate=LEAK_RATE)
+	model.train() # 訓練
+	train_result = model.get_train_result() # 訓練の結果を取得
 
-    model.train() # 訓練
-    train_result = model.get_train_result() # 訓練の結果を取得
-
-    t = np.linspace(0, T, NUM_TIME_STEPS)
-    ## plot
-    plt.plot(t, data_sin, label="inputs")
-    plt.plot(t[:num_target], train_result, label="trained")
-    plt.plot(t[num_target:], predict_result, label="predicted")
-    plt.axvline(x=int(T * RATIO_TRAIN), label="end of train", color="green") # border of train and prediction
-    plt.legend()
-    plt.title("Echo State Network Sin Prediction")
-    plt.xlabel("time[ms]")
-    plt.ylabel("y(t)")
-    plt.show()
+	t = np.linspace(0, T, NUM_TIME_STEPS)
+	## plot
+	plt.plot(t, data_sin, label="inputs")
+	plt.plot(t[:num_target], train_result, label="trained")
+	plt.plot(t[num_target:], predict_result, label="predicted")
+	plt.axvline(x=int(T * RATIO_TRAIN), label="end of train", color="green") # border of train and prediction
+	plt.legend()
+	plt.title("Echo State Network Sin Prediction")
+	plt.xlabel("time[ms]")
+	plt.ylabel("y(t)")
+	plt.show()
 
 if __name__=="__main__":
-    main()
+		main()

@@ -3,21 +3,24 @@ import csv
 import numpy as np
 import glob
 
-class Image Processing:
+class ImageProcessing:
 
-	def generate_bgr(self, reshaped_width = 4, reshaped_height = 6)
+	def generate_bgr(reshaped_width, reshaped_height):
 
-		files = glob.glob("Try2_aiueo_volhalf/*.png")
+		sample = cv2.imread("Try2_aiueo_volhalf/0004.png")##連番画像のどれでもよいのでサンプル画像として指定
+		width, height, channel = sample.shape
+		pixels = width * height
+		mesh_width = width/reshaped_width
+		mesh_height = height/reshaped_height
+		mesh_pixels = mesh_width * mesh_height
+
+		bgr_comp = np.zeros(int(pixels/mesh_pixels*3))
+
+		files = glob.glob("Try2_aiueo_volhalf/*.png")##連番画像が保存されているフォルダを指定
 
 		for file in files:
+
 			img = cv2.imread(file)#読み込み
-			width, height, channel = img.shape
-			pixels = width * height
-			reshaped_width = 4
-			reshaped_height = 6
-			mesh_width = width/reshaped_width
-			mesh_height = height/reshaped_height
-			mesh = mesh_width * mesh_height
 
 			reshaped_bgr_array = img.reshape(pixels, 3)
 
@@ -45,12 +48,12 @@ class Image Processing:
 			print(reshaped_r_array)
 			'''
 
-			grid_b = b_array.reshape(int(pixels/mesh),int(mesh_height),int(mesh_width))
-			grid_g = g_array.reshape(int(pixels/mesh),int(mesh_height),int(mesh_width))
-			grid_r = r_array.reshape(int(pixels/mesh),int(mesh_height),int(mesh_width))
+			grid_b = b_array.reshape(int(pixels/mesh_pixels),int(mesh_width),int(mesh_height))
+			grid_g = g_array.reshape(int(pixels/mesh_pixels),int(mesh_width),int(mesh_height))
+			grid_r = r_array.reshape(int(pixels/mesh_pixels),int(mesh_width),int(mesh_height))
 
 			i = 0
-			stack = int(pixels/mesh)
+			stack = int(pixels/mesh_pixels)
 			b_mean = np.array([0])
 			g_mean = np.array([0])
 			r_mean = np.array([0])
@@ -76,12 +79,16 @@ class Image Processing:
 
 			mean_array = np.concatenate([b_mean, g_mean, r_mean])
 
-			#print(mean_array_T)
+			bgr_comp = np.vstack([bgr_comp,mean_array])
+			
 
 			'''
-			with open('Try2_bgr.csv','a') as f:
+			with open('Try2_bgr.csv','a') as f:			ここを使えばcsvへの書き込みが可能
 				c = csv.writer(f, lineterminator='\n')
 				c.writerow(mean_array)
 			'''
 
-			return mean_array
+		bgr_comp = np.delete(bgr_comp,0,axis=0)
+
+		return bgr_comp
+
