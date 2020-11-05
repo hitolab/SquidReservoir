@@ -4,13 +4,13 @@ from generate_bgr import ImageProcessing
 import matplotlib.pyplot as plt
 import csv
 
-T = 121
+T = 40
 dt = 1
 AMPLITUDE = 0.9
 LEAK_RATE=0.02
-NUM_INPUT_NODES = 36
+NUM_INPUT_NODES = 108
 NUM_RESERVOIR_NODES = 150
-NUM_OUTPUT_NODES = 2
+NUM_OUTPUT_NODES = 1
 NUM_TIME_STEPS = int(T/dt)
 
 # example of activator
@@ -19,10 +19,23 @@ def ReLU(x):
 
 def main():
 
-	input_data = ImageProcessing.generate_bgr(4, 3)##画像を何個に分割するか(横、縦)
+	width = 4
+	height = 3
+
+	input_data = ImageProcessing.generate_bgr(width, height) #画像を何個に分割するか(横、縦)
+	input_data = input_data.reshape([5, width * height * 3 * 3])
+	for i in range(3):
+		input_data = np.vstack([input_data, input_data])
+	print(input_data)
+
+	target_data = np.array([1,2,3,4,5])
+	for i in range(3):
+		target_data = np.hstack([target_data,target_data])
+	target_data = target_data.reshape(-1,1) #reshapeの-1による指定されると、推測して決定される。
+	print(target_data)
 
 	model = ReservoirNetWork(inputs=input_data, #ReservoirNetwork.pyを参照
-		outputs_target = target_data,
+		target_data = target_data,
 		num_input_nodes=NUM_INPUT_NODES, 
 		num_reservoir_nodes=NUM_RESERVOIR_NODES, 
 		num_output_nodes=NUM_OUTPUT_NODES, 
@@ -33,10 +46,8 @@ def main():
 
 	t = np.linspace(0, T, NUM_TIME_STEPS)
 	## plot
-	plt.plot(t, data_sin, label="inputs")
-	plt.plot(t[:num_target], train_result, label="trained")
-	plt.plot(t[num_target:], predict_result, label="predicted")
-	plt.axvline(x=int(T * RATIO_TRAIN), label="end of train", color="green") # border of train and prediction
+	plt.plot(t, target_data, label="input_data")
+	plt.plot(t, train_result, label="predicted")
 	plt.legend()
 	plt.title("Echo State Network Sin Prediction")
 	plt.xlabel("time[ms]")

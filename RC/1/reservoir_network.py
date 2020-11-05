@@ -3,13 +3,12 @@ from scipy import linalg
 
 class ReservoirNetWork:
 
-    def __init__(self, inputs, outputs_target, num_input_nodes, num_reservoir_nodes, num_output_nodes, leak_rate=0.1, activator=np.tanh):
+    def __init__(self, inputs, target_data, num_input_nodes, num_reservoir_nodes, num_output_nodes, leak_rate=0.1, activator=np.tanh):
         self.inputs = inputs # 学習で使う入力
-        self.outputs_target = outputs_target
+        self.target_data = target_data
         self.log_reservoir_nodes = np.array([np.zeros(num_reservoir_nodes)]) # reservoir層のノードの状態を記録
-        # init weights
-        # np.array はN次元配列を作る関数
 
+        # init weights
         self.weights_input = self._generate_variational_weights(num_input_nodes, num_reservoir_nodes)
         self.weights_reservoir = self._generate_reservoir_weights(num_reservoir_nodes)
         self.weights_output = np.zeros([num_reservoir_nodes, num_output_nodes])
@@ -24,21 +23,22 @@ class ReservoirNetWork:
 
     # reservoir層のノードの次の状態を取得
     def _get_next_reservoir_nodes(self, input, current_state):
-        next_state = (1 - self.leak_rate) * current_state      # 現在 = 寄与率 * 過去
-        next_state += self.leak_rate * (np.array([input]) @ self.weights_input  # x(t)=f((1−δ)x(t−1)+δ(Winu(t−1)+Wresx(t−1)))   reservoir層の内部状態
+        next_state = (1 - self.leak_rate) * current_state
+        next_state += self.leak_rate * (np.array([input]) @ self.weights_input
             + current_state @ self.weights_reservoir)
         return self.activator(next_state)
 
     # 出力層の重みを更新
-    def _update_weights_output(self, lambda0):  # Woutの学習に関する式(行列表記などが難しい)
+    def _update_weights_output(self, lambda0):
         # Ridge Regression
         E_lambda0 = np.identity(self.num_reservoir_nodes) * lambda0 # lambda0
         inv_x = np.linalg.inv(self.log_reservoir_nodes.T @ self.log_reservoir_nodes + E_lambda0)
         # update weights of output layer
-        self.weights_output = (inv_x @ self.log_reservoir_nodes.T) @ self.outputs_target
+        self.weights_output = (inv_x @ self.log_reservoir_nodes.T) @ self.target_data
+        print(self.weights_output)
 
     # 学習する
-    def train(self, lambda0=0.1):   #ちょっとわからない
+    def train(self, lambda0=0.1):
         for input in self.inputs:
             current_state = np.array(self.log_reservoir_nodes[-1])
             self.log_reservoir_nodes = np.append(self.log_reservoir_nodes,
@@ -75,7 +75,15 @@ class ReservoirNetWork:
 
     # 重みを0.1か-0.1で初期化したものを返す
     def _generate_variational_weights(self, num_pre_nodes, num_post_nodes):
-        return (np.random.randint(0, 2, num_pre_nodes * num_post_nodes).reshape([num_pre_nodes, num_post_nodes]) * 2 - 1) * 0.1
+        #return (np.random.randint(0, 2, (num_pre_nodes * num_post_nodes).reshape([num_pre_nodes, num_post_nodes]) * 2 - 1) * 0.1
+        switch = [1,-1]
+        weights_input = np.array(0)
+        for i in range(int(num_pre_nodes)):
+            r = np.random.choice(switch)
+            weights_input = np.append(weights_input, r)
+        weights_input = np.delete(weights_input,0)
+        weights_input = weights_input * 0.1
+        return weights_input
 
     # Reservoir層の重みを初期化
     def _generate_reservoir_weights(self, num_nodes):
