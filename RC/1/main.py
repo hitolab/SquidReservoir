@@ -4,11 +4,20 @@ from generate_bgr import ImageProcessing
 import matplotlib.pyplot as plt
 import csv
 
-T = 40
+movie_second = 15
+rgb = 3
+width = 4
+height = 3
+for_times = 4
+
+T = movie_second * pow(2,for_times)
+#T_train = movie_second * pow(2,for_times)
+#T_result = movie_second * pow(2,for_times)
+#T = T_train + T_result
 dt = 1
 AMPLITUDE = 0.9
 LEAK_RATE=0.02
-NUM_INPUT_NODES = 108
+NUM_INPUT_NODES = width * height * rgb
 NUM_RESERVOIR_NODES = 150
 NUM_OUTPUT_NODES = 1
 NUM_TIME_STEPS = int(T/dt)
@@ -19,20 +28,14 @@ def ReLU(x):
 
 def main():
 
-	width = 4
-	height = 3
-
 	input_data = ImageProcessing.generate_bgr(width, height) #画像を何個に分割するか(横、縦)
-	input_data = input_data.reshape([5, width * height * 3 * 3])
-	for i in range(3):
+	for i in range(for_times):
 		input_data = np.vstack([input_data, input_data])
-	print(input_data)
 
-	target_data = np.array([1,2,3,4,5])
-	for i in range(3):
+	target_data = np.array([1,1,1,2,2,2,3,3,3,4,4,4,5,5,5])
+	for i in range(for_times):
 		target_data = np.hstack([target_data,target_data])
 	target_data = target_data.reshape(-1,1) #reshapeの-1による指定されると、推測して決定される。
-	print(target_data)
 
 	model = ReservoirNetWork(inputs=input_data, #ReservoirNetwork.pyを参照
 		target_data = target_data,
@@ -42,12 +45,15 @@ def main():
 		leak_rate=LEAK_RATE)
 
 	model.train() # 訓練
+
 	train_result = model.get_train_result() # 訓練の結果を取得
 
 	t = np.linspace(0, T, NUM_TIME_STEPS)
 	## plot
-	plt.plot(t, target_data, label="input_data")
+	plt.plot(t, target_data, label="target_data")
 	plt.plot(t, train_result, label="predicted")
+	#plt.plot(t[:T_train], target_data, label="target_data")
+	#plt.plot(t[T_train:], train_result, label="predicted")
 	plt.legend()
 	plt.title("Echo State Network Sin Prediction")
 	plt.xlabel("time[ms]")
