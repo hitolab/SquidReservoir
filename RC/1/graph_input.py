@@ -1,8 +1,10 @@
 import cv2
 import csv
 import numpy as np
+import scipy.stats as sp
 import glob
 import matplotlib.pyplot as plt
+
 
 def main():
 	rgb = 3
@@ -95,15 +97,13 @@ def main():
 		'''
 
 	bgr_comp = np.delete(bgr_comp,0,axis=0)
-	print(bgr_comp)
 
-
-
+	bgr_std = sp.stats.zscore(bgr_comp, axis=0)
 
 	t = np.linspace(0, T, T)
 	## plot
 	for i in range(rgb * reshaped_height * reshaped_width):
-		plt.plot(t, bgr_comp[:,i], label="input")
+		plt.plot(t, bgr_std[:,i], label="input")
 	#plt.plot(t[:T_train], target_data, label="target_data")
 	#plt.plot(t[T_train:], train_result, label="predicted")
 	plt.legend()

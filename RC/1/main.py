@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.stats as sp
 from reservoir_network import ReservoirNetWork
 from generate_bgr import ImageProcessing
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ dt = 1
 AMPLITUDE = 0.9
 LEAK_RATE=0.02
 NUM_INPUT_NODES = width * height * rgb
-NUM_RESERVOIR_NODES = 150
+NUM_RESERVOIR_NODES = 2000
 NUM_OUTPUT_NODES = 1
 NUM_TIME_STEPS = int(T/dt)
 
@@ -29,15 +30,18 @@ def ReLU(x):
 def main():
 
 	input_data = ImageProcessing.generate_bgr(width, height) #画像を何個に分割するか(横、縦)
+
+	input_std = sp.stats.zscore(input_data, axis=0)
+
 	for i in range(for_times):
-		input_data = np.vstack([input_data, input_data])
+		input_std = np.vstack([input_std, input_std])
 
 	target_data = np.array([1,1,1,2,2,2,3,3,3,4,4,4,5,5,5])
 	for i in range(for_times):
 		target_data = np.hstack([target_data,target_data])
 	target_data = target_data.reshape(-1,1) #reshapeの-1による指定されると、推測して決定される。
 
-	model = ReservoirNetWork(inputs=input_data, #ReservoirNetwork.pyを参照
+	model = ReservoirNetWork(inputs = input_std, #ReservoirNetwork.pyを参照
 		target_data = target_data,
 		num_input_nodes=NUM_INPUT_NODES, 
 		num_reservoir_nodes=NUM_RESERVOIR_NODES, 

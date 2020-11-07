@@ -1,4 +1,5 @@
 import numpy as np
+import csv
 from scipy import linalg
 
 class ReservoirNetWork:
@@ -21,8 +22,15 @@ class ReservoirNetWork:
         self.leak_rate = leak_rate # 漏れ率
         self.activator = activator # 活性化関数
 
+
+    def _graph_reservoir(self, current_state):
+        with open('reservoir_nodes.csv','a') as f:
+            c = csv.writer(f, lineterminator='\n')
+            c.writerow(current_state)
+
     # reservoir層のノードの次の状態を取得
     def _get_next_reservoir_nodes(self, input, current_state):
+        #self._graph_reservoir(current_state)   #この行を有効にすると、x(t)をcsvに保存できる。
         next_state = (1 - self.leak_rate) * current_state
         next_state += self.leak_rate * (np.array([input]) @ self.weights_input
             + current_state @ self.weights_reservoir)
@@ -35,7 +43,7 @@ class ReservoirNetWork:
         inv_x = np.linalg.inv(self.log_reservoir_nodes.T @ self.log_reservoir_nodes + E_lambda0)
         # update weights of output layer
         self.weights_output = (inv_x @ self.log_reservoir_nodes.T) @ self.target_data
-        print(self.weights_output)
+        #print(self.weights_output)
 
     # 学習する
     def train(self, lambda0=0.1):
