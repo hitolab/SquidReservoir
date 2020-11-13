@@ -9,7 +9,7 @@ movie_second = 15
 rgb = 3
 width = 4
 height = 3
-for_times = 4
+for_times = 2
 
 T = movie_second * pow(2,for_times)
 #T_train = movie_second * pow(2,for_times)
@@ -19,13 +19,10 @@ dt = 1
 AMPLITUDE = 0.9
 LEAK_RATE=0.02
 NUM_INPUT_NODES = width * height * rgb
-NUM_RESERVOIR_NODES = 2000
+NUM_RESERVOIR_NODES = 100
 NUM_OUTPUT_NODES = 1
 NUM_TIME_STEPS = int(T/dt)
 
-# example of activator
-def ReLU(x):
-	return np.maximum(0, x)
 
 def main():
 
@@ -55,7 +52,7 @@ def main():
 	t = np.linspace(0, T, NUM_TIME_STEPS)
 	## plot
 	plt.plot(t, target_data, label="target_data")
-	plt.plot(t, train_result, label="predicted")
+	plt.plot(t, train_result, label="trained")
 	#plt.plot(t[:T_train], target_data, label="target_data")
 	#plt.plot(t[T_train:], train_result, label="predicted")
 	plt.legend()
