@@ -5,10 +5,10 @@ import glob
 
 class ImageProcessing:
 
-	def generate_bgr(reshaped_width, reshaped_height):
+	def generate_bgr(reshaped_width, reshaped_height, Sample_picture, File):
 
-		sample = cv2.imread("Try2_aiueo_volhalf/0004.png")##連番画像のどれでもよいのでサンプル画像として指定
-		width, height, channel = sample.shape
+		sample = cv2.imread(Sample_picture)##連番画像のどれでもよいのでサンプル画像として指定
+		height, width, channel = sample.shape
 		pixels = width * height
 		mesh_width = width/reshaped_width
 		mesh_height = height/reshaped_height
@@ -16,7 +16,7 @@ class ImageProcessing:
 
 		bgr_comp = np.zeros(int(pixels/mesh_pixels*3))
 
-		files = glob.glob("Try2_aiueo_volhalf/*.png")##連番画像が保存されているフォルダを指定
+		files = glob.glob(File)##連番画像が保存されているフォルダを指定
 
 		for file in files:
 

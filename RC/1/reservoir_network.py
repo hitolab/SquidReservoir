@@ -4,7 +4,7 @@ from scipy import linalg
 
 class ReservoirNetWork:
 
-	def __init__(self, inputs, target_data, num_input_nodes, num_reservoir_nodes, num_output_nodes, leak_rate=0.2, activator=np.tanh):
+	def __init__(self, inputs, target_data, test_data, num_input_nodes, num_reservoir_nodes, num_output_nodes, leak_rate=0.2, activator=np.tanh):
 		self.inputs = inputs # 学習で使う入力
 		self.target_data = target_data
 		self.log_reservoir_nodes = np.array([np.zeros(num_reservoir_nodes)]) # reservoir層のノードの状態を記録
@@ -21,6 +21,8 @@ class ReservoirNetWork:
 
 		self.leak_rate = leak_rate # 漏れ率
 		self.activator = activator # 活性化関数
+
+		self.test_data = test_data
 
     # 学習する
 	def train(self,lambda0=0.1):
@@ -55,7 +57,14 @@ class ReservoirNetWork:
 		reservoir_nodes = np.zeros(self.num_reservoir_nodes)
 		for input in self.inputs:
 			reservoir_nodes = self._get_next_reservoir_nodes(input, reservoir_nodes)
-			print(reservoir_nodes)
+			outputs.append(self.get_output(reservoir_nodes))
+		return outputs
+
+	def get_test_result(self):
+		outputs = []
+		reservoir_nodes = np.zeros(self.num_reservoir_nodes)
+		for input in self.test_data:
+			reservoir_nodes = self._get_next_reservoir_nodes(input, reservoir_nodes)
 			outputs.append(self.get_output(reservoir_nodes))
 		return outputs
 
